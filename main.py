@@ -8,7 +8,11 @@ app = Flask(__name__)
 
 
 def get_top_colors(image_path, num_colors=10):
-    img = Image.open(image_path)
+    try:
+        img = Image.open(image_path)
+        img.verify()
+    except (IOError, SyntaxError):
+        return jsonify({"error": "Invalid image file"}), 400
     img = img.resize((100, 100))
     img = img.convert('RGB')
     pixels = np.array(img).reshape(-1, 3)
