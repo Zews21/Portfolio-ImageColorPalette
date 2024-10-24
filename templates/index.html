@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Extractor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Image Color Extractor</h1>
+        <p>Upload an image to extract its top 10 most common colors!</p>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="image" id="imageInput" required>
+            <button type="submit">Upload</button>
+        </form>
+
+        <h2>Top 10 Colors</h2>
+        <div id="colorsContainer" class="colors-container"></div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').onsubmit = async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData();
+            const fileField = document.getElementById('imageInput').files[0];
+            formData.append('image', fileField);
+
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const colorsContainer = document.getElementById('colorsContainer');
+            colorsContainer.innerHTML = '';
+
+            if (response.ok) {
+                const colors = await response.json();
+                colors.forEach(color => {
+                    const colorDiv = document.createElement('div');
+                    colorDiv.className = 'color-block';
+                    colorDiv.style.backgroundColor = color.color;
+                    colorDiv.title = `${color.color} (Count: ${color.count})`;
+                    colorsContainer.appendChild(colorDiv);
+                });
+            } else {
+                colorsContainer.innerHTML = 'Error uploading or processing the image.';
+            }
+        };
+    </script>
+</body>
+</html>
